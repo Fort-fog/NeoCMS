@@ -1,0 +1,43 @@
+{{define "services.html"}}<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{.SiteTitle}} - Services</title>
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap">
+</head>
+<body>
+<div class="cyber-grid"></div>
+<div class="particles"></div>
+<nav class="nav">
+<div class="nav-logo">{{.SiteTitle}}</div>
+<div class="nav-links">
+<a href="/">Главная</a>
+<a href="/services">Услуги</a>
+<a href="/gallery">Галерея</a>
+<a href="/about">О нас</a>
+<a href="/contact">Контакты</a>
+</div>
+</nav>
+<main class="page">
+<h1 class="neon-title">Услуги</h1>
+<p class="hero-sub">{{.SiteTagline}}</p>
+<div class="cards-grid">
+{{range .Services}}
+<div class="card">
+<div class="service-icon">{{.Icon}}</div>
+<h2 class="neon-cyan">{{.Title}}</h2>
+<p>{{.Description}}</p>
+{{if .Image}}<img src="{{.Image}}" alt="{{.Title}}">{{end}}
+</div>
+{{end}}
+</div>
+</main>
+<footer class="footer">
+<p>{{.Footer.Copyright}}</p>
+</footer>
+<script src="/static/js/main.js"></script>
+</body>
+</html>{{end}}

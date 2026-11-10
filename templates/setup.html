@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Setup - NEON NEXUS Admin</title>
+	<style>
+		body { font-family: 'Courier New', monospace; background: #0a0a1a; color: #00ffff; display: flex; justify-content: center; align-items: center; min-height: 100vh; margin: 0; }
+		.setup-box { background: #111128; border: 1px solid #00ffff; padding: 2rem; border-radius: 8px; width: 100%; max-width: 400px; }
+		h1 { color: #ff00ff; text-align: center; }
+		label { display: block; margin-top: 1rem; color: #00ffff; }
+		input { width: 100%; padding: 0.5rem; margin-top: 0.25rem; background: #0a0a1a; border: 1px solid #00ffff; color: #00ffff; border-radius: 4px; }
+		button { margin-top: 1.5rem; width: 100%; padding: 0.75rem; background: #ff00ff; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+		button:hover { background: #cc00cc; }
+		.error { color: #ff4444; text-align: center; margin-top: 1rem; }
+	</style>
+</head>
+<body>
+	<div class="setup-box">
+		<h1>Admin Setup</h1>
+		{{if .Error}}<p class="error">{{.Error}}</p>{{end}}
+		<form method="POST" action="/admin/setup">
+			<label>New Password:
+				<input type="password" name="password" required minlength="10">
+			</label>
+			<label>Confirm Password:
+				<input type="password" name="confirm" required minlength="10">
+			</label>
+			<button type="submit">Set Password</button>
+		</form>
+	</div>
+</body>
+</html>

@@ -1,0 +1,193 @@
+{{define "gallery.html"}}<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gallery - {{.SiteTitle}}</title>
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap">
+<style>
+/* ===== 3D coverflow gallery (pure CSS 3D transforms, no libraries) ===== */
+.gallery-stage{position:relative;width:100%;max-width:1100px;margin:0 auto;height:460px;perspective:1500px;-webkit-perspective:1500px}
+.gallery-3d{position:absolute;inset:0;transform-style:preserve-3d;-webkit-transform-style:preserve-3d}
+.g-slide{position:absolute;top:50%;left:50%;width:420px;height:300px;margin:-150px 0 0 -210px;border-radius:8px;overflow:hidden;background:var(--card-bg);border:1px solid rgba(0,212,255,.35);box-shadow:0 0 24px rgba(0,212,255,.15);transition:transform .55s cubic-bezier(.25,.7,.3,1),opacity .55s,filter .55s;backface-visibility:hidden;-webkit-backface-visibility:hidden;cursor:pointer;opacity:0;transform:translateZ(-800px) rotateY(90deg)}
+.g-slide img{width:100%;height:240px;object-fit:cover;display:block;background:#05051a}
+.g-slide .g-title{margin:10px 14px;color:var(--neon-blue);font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.g-slide.is-active{box-shadow:0 0 45px rgba(176,38,255,.5),0 0 25px rgba(0,212,255,.4);border-color:var(--neon-pink);z-index:5}
+.g-slide.is-neighbor{filter:brightness(.6) saturate(.8)}
+.g-slide.is-far{filter:brightness(.3) saturate(.5)}
+.gallery-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:10;width:48px;height:48px;border-radius:50%;border:1px solid rgba(0,212,255,.5);background:rgba(5,5,16,.7);color:var(--neon-cyan,#00d4ff);font-size:1.6rem;line-height:1;cursor:pointer;transition:box-shadow .3s,border-color .3s}
+.gallery-nav:hover,.gallery-nav:focus-visible{border-color:var(--neon-pink);box-shadow:0 0 18px rgba(255,0,127,.5);outline:none}
+.gallery-prev{left:8px}
+.gallery-next{right:8px}
+.gallery-dots{display:flex;justify-content:center;gap:10px;margin-top:14px}
+.gallery-dots button{width:10px;height:10px;border-radius:50%;border:1px solid rgba(0,212,255,.6);background:transparent;padding:0;cursor:pointer;transition:box-shadow .3s,background .3s}
+.gallery-dots button.on{background:var(--neon-pink);border-color:var(--neon-pink);box-shadow:0 0 10px rgba(255,0,127,.8)}
+.gallery-hint{text-align:center;color:#8a8aa8;font-size:.85rem;margin-top:10px}
+@media(max-width:900px){.gallery-stage{height:340px}.g-slide{width:300px;height:240px;margin:-120px 0 0 -150px}.g-slide img{height:185px}}
+@media(max-width:600px){.gallery-stage{height:270px}.g-slide{width:230px;height:210px;margin:-105px 0 0 -115px}.g-slide img{height:160px}}
+
+/* ===== lightbox ===== */
+.lightbox-overlay{position:fixed;inset:0;background:rgba(0,0,0,.92);display:none;justify-content:center;align-items:center;z-index:9999;cursor:pointer}
+.lightbox-overlay.active{display:flex}
+.lightbox-overlay img{max-width:90vw;max-height:85vh;border-radius:6px;box-shadow:0 0 60px rgba(176,38,255,.4)}
+.lightbox-close{position:absolute;top:20px;right:30px;color:var(--neon-pink);font-size:2.5rem;cursor:pointer}
+
+/* ===== fallback grid for 1-2 images ===== */
+.gallery-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;padding:20px;list-style:none;max-width:1100px;margin:0 auto}
+.gallery-grid li{background:var(--card-bg);border:1px solid rgba(0,212,255,.25);border-radius:8px;overflow:hidden;transition:transform .3s,box-shadow .3s;cursor:pointer}
+.gallery-grid li:hover{transform:translateY(-6px) scale(1.02);box-shadow:0 0 30px rgba(0,212,255,.35)}
+.gallery-grid img{width:100%;height:240px;object-fit:cover;display:block}
+.gallery-grid .g-title{margin:12px 16px 16px;color:var(--neon-blue);font-size:1rem;min-height:1em}
+@media(max-width:768px){.gallery-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body class="cyberpunk">
+<div class="cyber-grid"></div>
+<nav class="nav">
+<div class="nav-logo"><a href="/">{{.SiteTitle}}</a></div>
+<div class="nav-links">
+<a href="/">Главная</a>
+<a href="/services">Услуги</a>
+<a href="/gallery">Галерея</a>
+<a href="/about">О нас</a>
+<a href="/contact">Контакты</a>
+</div>
+</nav>
+<main class="page">
+<h1 class="page-title">{{.SiteTitle}} <span class="neon-pink">Gallery</span></h1>
+{{$n := len .Gallery}}
+{{if gt $n 2}}
+<div class="gallery-stage" id="gallery-stage" tabindex="0" aria-label="3D-галерея, используйте стрелки влево и вправо">
+<div class="gallery-3d" id="gallery-3d">
+{{$total := $n}}
+{{range $i, $item := .Gallery}}
+<figure class="g-slide" data-index="{{$i}}" data-total="{{$total}}" data-src="{{$item.Image}}" data-title="{{$item.Title}}">
+{{if $item.Image}}<img src="{{$item.Image}}" alt="{{$item.Title}}" draggable="false">{{end}}
+<figcaption class="g-title">{{$item.Title}}</figcaption>
+</figure>
+{{end}}
+</div>
+<button class="gallery-nav gallery-prev" id="gallery-prev" aria-label="Предыдущее изображение">&#8249;</button>
+<button class="gallery-nav gallery-next" id="gallery-next" aria-label="Следующее изображение">&#8250;</button>
+</div>
+<div class="gallery-dots" id="gallery-dots"></div>
+<p class="gallery-hint">Стрелки ← → или свайп — листать · клик по центральному слайду — открыть крупно · Esc — закрыть</p>
+{{else if gt $n 0}}
+<ul class="gallery-grid">
+{{range .Gallery}}
+<li class="g-card" data-src="{{.Image}}" data-title="{{.Title}}">
+{{if .Image}}<img src="{{.Image}}" alt="{{.Title}}" loading="lazy">{{end}}
+<p class="g-title">{{.Title}}</p>
+</li>
+{{end}}
+</ul>
+{{else}}
+<p class="empty-msg">Галерея пока пуста. Загрузите фотографии через админку.</p>
+{{end}}
+<div class="lightbox-overlay" id="lightbox"><span class="lightbox-close">&times;</span><img id="lightbox-img" src="" alt=""></div>
+<script>
+(function(){
+var lb=document.getElementById('lightbox');
+var lbImg=document.getElementById('lightbox-img');
+function openLightbox(src,title){if(!lb||!src)return;lbImg.src=src;lbImg.alt=title||'';lb.classList.add('active');}
+function closeLightbox(){if(!lb)return;lb.classList.remove('active');lbImg.src='';}
+if(lb){
+lb.addEventListener('click',function(e){
+if(e.target===lb||e.target.classList.contains('lightbox-close'))closeLightbox();
+});
+}
+document.addEventListener('keydown',function(e){
+if(e.key==='Escape')closeLightbox();
+});
+
+/* --- fallback grid lightbox (1-2 images) --- */
+var cards=document.querySelectorAll('.gallery-grid li[data-src]');
+for(var i=0;i<cards.length;i++){
+(function(card){
+card.addEventListener('click',function(){openLightbox(card.getAttribute('data-src'),card.getAttribute('data-title'));});
+})(cards[i]);
+}
+
+/* --- 3D coverflow carousel --- */
+var stage=document.getElementById('gallery-stage');
+if(!stage)return;
+var slides=Array.prototype.slice.call(stage.querySelectorAll('.g-slide'));
+var total=slides.length;
+if(total<3)return;
+var current=0;
+function pos(i){
+var d=i-current;
+/* take the shorter way around the circle so coverflow wraps naturally */
+if(d>total/2)d-=total;
+if(d<-total/2)d+=total;
+return d;
+}
+function render(){
+slides.forEach(function(s,i){
+var d=pos(i);
+var ad=Math.abs(d);
+var tx=d*230,tz=-Math.min(ad,4)*160,ry=d===0?0:(d<0?38:-38);
+if(ad>3){tx=d*0;tz=-700;ry=d<0?55:-55;}
+s.style.transform='translateX('+tx+'px) translateZ('+tz+'px) rotateY('+ry+'deg)';
+s.style.opacity=ad===0?'1':(ad>3?'0':String(Math.max(0.15,1-ad*0.22)));
+s.style.zIndex=String(10-ad);
+s.style.pointerEvents=ad>3?'none':'auto';
+s.classList.toggle('is-active',d===0);
+s.classList.toggle('is-neighbor',ad===1);
+s.classList.toggle('is-far',ad>=2&&ad<=3);
+});
+var dots=document.getElementById('gallery-dots');
+if(dots){
+for(var j=0;j<dots.children.length;j++)dots.children[j].classList.toggle('on',j===current);
+}
+}
+function go(n){current=((n%total)+total)%total;render();}
+var prev=document.getElementById('gallery-prev'),next=document.getElementById('gallery-next');
+if(prev)prev.addEventListener('click',function(){go(current-1);});
+if(next)next.addEventListener('click',function(){go(current+1);});
+slides.forEach(function(s,i){
+s.addEventListener('click',function(){
+if(i===current)openLightbox(s.getAttribute('data-src'),s.getAttribute('data-title'));
+else go(i);
+});
+});
+var dots=document.getElementById('gallery-dots');
+if(dots){
+for(var j=0;j<total;j++){
+(function(k){
+var b=document.createElement('button');
+b.type='button';
+b.setAttribute('aria-label','Слайд '+(k+1));
+b.addEventListener('click',function(){go(k);});
+dots.appendChild(b);
+})(j);
+}
+}
+document.addEventListener('keydown',function(e){
+if(lb&&lb.classList.contains('active'))return;
+if(e.key==='ArrowLeft')go(current-1);
+else if(e.key==='ArrowRight')go(current+1);
+});
+/* touch swipe */
+var touchX=null;
+stage.addEventListener('touchstart',function(e){if(e.touches.length===1)touchX=e.touches[0].clientX;},{passive:true});
+stage.addEventListener('touchend',function(e){
+if(touchX===null)return;
+var dx=(e.changedTouches[0].clientX-touchX);
+if(Math.abs(dx)>40)go(current+(dx<0?1:-1));
+touchX=null;
+},{passive:true});
+render();
+})();
+</script>
+</main>
+<footer class="footer">
+<p>{{.Footer.Copyright}}</p>
+{{if .Footer.Links}}{{.Footer.Links}}{{end}}
+</footer>
+</body>
+</html>
+{{end}}

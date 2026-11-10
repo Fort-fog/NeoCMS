@@ -1,0 +1,35 @@
+{{define "about.html"}}<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>About - {{.SiteTitle}}</title>
+<link rel="stylesheet" href="/static/css/style.css">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap">
+</head>
+<body>
+<nav class="nav">
+<a href="/" class="logo">{{.SiteTitle}}</a>
+<div class="nav-links">
+<a href="/">Главная</a>
+<a href="/services">Услуги</a>
+<a href="/gallery">Галерея</a>
+<a href="/about">О нас</a>
+<a href="/contact">Контакты</a>
+</div>
+</nav>
+<main>
+<section class="page">
+<h1 class="page-title">{{.About.Title}}</h1>
+{{if .About.Image}}<img src="{{.About.Image}}" alt="{{.About.Title}}" class="about-img" style="max-width:100%;border-radius:4px;margin:20px 0;">{{end}}
+<p>{{.About.Description}}</p>
+</section>
+</main>
+<footer class="footer">
+<p>{{.Footer.Copyright}}</p>
+{{if .Footer.Links}}{{.Footer.Links}}{{end}}
+</footer>
+</body>
+</html>
+{{end}}

@@ -1,0 +1,101 @@
+{{define "contact.html"}}<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.SiteTitle}} — Контакты</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap">
+</head>
+<body class="cyberpunk">
+    <div class="cyber-grid"></div>
+    <nav class="main-nav">
+        <div class="nav-brand"><a href="/">{{.SiteTitle}}</a></div>
+        <div class="nav-links">
+            {{range .NavLinks}}<a href="{{.URL}}">{{.Label}}</a>{{end}}
+        </div>
+    </nav>
+
+    <main class="page">
+        <h1 class="page-title">{{.Contact.Title}}</h1>
+        <p class="contact-intro">{{.Contact.Description}}</p>
+
+        <div class="contact-layout">
+            <div class="contact-details">
+                <div class="contact-card">
+                    <h3 class="neon-cyan">Связь</h3>
+                    <div class="detail-row">
+                        <span class="detail-icon">📧</span>
+                        <span class="detail-value">{{.Contact.Email}}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-icon">📞</span>
+                        <span class="detail-value">{{.Contact.Phone}}</span>
+                    </div>
+                    <div class="detail-row">
+                        <span class="detail-icon">📍</span>
+                        <span class="detail-value">{{.Contact.Address}}</span>
+                    </div>
+                </div>
+                <div class="contact-card">
+                    <h3 class="neon-blue">Сектор связи</h3>
+                    <p>Мы находимся в киберпространстве. Любая передача данных обрабатывается мгновенно. Не бойся сигнала — доверяй потоку.</p>
+                </div>
+            </div>
+
+            <form id="contact-form" class="contact-form">
+                <h3 class="form-title neon-pink">Передать сигнал</h3>
+                <div class="form-group">
+                    <label for="name">Имя</label>
+                    <input type="text" id="name" name="name" required placeholder="Введите имя оператора">
+                </div>
+                <div class="form-group">
+                    <label for="email">Канал связи (Email)</label>
+                    <input type="email" id="email" name="email" required placeholder="your@signal.net">
+                </div>
+                <div class="form-group">
+                    <label for="message">Сообщение</label>
+                    <textarea id="message" name="message" rows="6" required placeholder="Введите шифрованное сообщение..."></textarea>
+                </div>
+                <button type="submit" class="btn-neon btn-pink">Отправить сигнал</button>
+                <p id="contact-msg" class="form-status"></p>
+            </form>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <p>{{.Footer.Copyright}}</p>
+        <div class="footer-links">{{.Footer.Links}}</div>
+    </footer>
+
+    <script>
+    document.getElementById('contact-form').addEventListener('submit', async(e)=>{
+        e.preventDefault();
+        const f = e.target;
+        const btn = f.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.textContent = 'Передача...';
+        const data = {name: f.elements['name'].value, email: f.elements['email'].value, message: f.elements['message'].value};
+        try {
+            const r = await fetch('/api/contact',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+            const res = await r.json();
+            const msgEl = document.getElementById('contact-msg');
+            if(res.ok){
+                msgEl.textContent = '✓ Сигнал передан успешно. Ожидай ответ.';
+                msgEl.className = 'form-status ok';
+                f.reset();
+            } else {
+                msgEl.textContent = '✗ ' + (res.error||'Ошибка передачи');
+                msgEl.className = 'form-status error';
+            }
+        } catch(err) {
+            const msgEl = document.getElementById('contact-msg');
+            msgEl.textContent = '✗ Связь потеряна. Попробуй снова.';
+            msgEl.className = 'form-status error';
+        }
+        btn.disabled = false;
+        btn.textContent = 'Отправить сигнал';
+    });
+    </script>
+</body>
+</html>{{end}}

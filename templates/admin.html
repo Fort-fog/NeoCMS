@@ -1,0 +1,318 @@
+{{define "admin.html"}}<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin — {{.SiteData.SiteTitle}}</title>
+    <meta name="csrf-token" content="{{.CsrfToken}}">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+    .admin-main{max-width:900px;margin:0 auto;padding:20px}
+    .admin-section{margin:20px 0;padding:15px;border:1px solid #333;border-radius:8px}
+    .admin-section h2{color:#0ff;margin-bottom:10px}
+    .admin-section label{display:block;margin:8px 0;color:#ccc}
+    .admin-section input[type=text],.admin-section input[type=email],.admin-section textarea{width:100%;padding:8px;background:#111;color:#eee;border:1px solid #444;border-radius:4px;margin-top:4px}
+    .admin-section textarea{min-height:80px;resize:vertical}
+    .admin-actions{display:flex;gap:10px;align-items:center;margin-bottom:20px}
+    .admin-actions button{padding:10px 20px;background:#0ff;color:#000;border:none;border-radius:4px;cursor:pointer;font-weight:bold}
+    .btn-danger{background:#f44!important;color:#fff!important}
+    .list-item{padding:10px;margin:5px 0;background:#1a1a2e;border:1px solid #333;border-radius:4px;display:flex;justify-content:space-between;align-items:center}
+    .list-item img{max-width:60px;max-height:60px;object-fit:cover;border-radius:4px}
+    .list-item button{padding:5px 10px;background:#f44;color:#fff;border:none;border-radius:3px;cursor:pointer;margin-left:5px}
+    .add-btn{margin:10px 0;padding:8px 16px;background:#0f0;color:#000;border:none;border-radius:4px;cursor:pointer}
+    .thumb-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .thumb-row img{width:80px;height:80px;object-fit:cover;border-radius:4px;border:1px solid #555}
+    .msg-item{padding:10px;margin:5px 0;background:#1a1a2e;border:1px solid #333;border-radius:4px}
+    .msg-item small{color:#888}
+    .save-status{margin-left:10px;font-size:0.9em}
+    </style>
+</head>
+<body>
+    <header class="cyber-header">
+        <h1>ADMIN PANEL</h1>
+        <p>Управление сайтом: {{.SiteData.SiteTitle}}</p>
+    </header>
+
+    <main class="admin-main">
+        <section class="admin-actions">
+            <button id="btn-save">Сохранить изменения</button>
+            <span id="save-status" class="save-status"></span>
+            <a href="/" target="_blank" style="color:#0ff;text-decoration:none">Открыть сайт ↗</a>
+            <form method="POST" action="/admin/logout" style="display:inline;margin-left:auto;">
+                <input type="hidden" name="csrf" value="{{.CsrfToken}}">
+                <button type="submit" class="btn-danger">Выйти</button>
+            </form>
+        </section>
+
+        <section class="admin-section">
+            <h2>Основные настройки</h2>
+            <label>Заголовок сайта:
+                <input type="text" id="site_title" value="{{.SiteData.SiteTitle}}">
+            </label>
+            <label>Слоган:
+                <input type="text" id="site_tagline" value="{{.SiteData.SiteTagline}}">
+            </label>
+        </section>
+
+        <section class="admin-section">
+            <h2>Hero-секция</h2>
+            <label>Заголовок:
+                <input type="text" id="hero_title" value="{{.SiteData.Hero.Title}}">
+            </label>
+            <label>Подзаголовок:
+                <textarea id="hero_subtitle">{{.SiteData.Hero.Subtitle}}</textarea>
+            </label>
+            <label>Текст кнопки:
+                <input type="text" id="hero_btn_text" value="{{.SiteData.Hero.ButtonText}}">
+            </label>
+            <label>Ссылка кнопки:
+                <input type="text" id="hero_btn_link" value="{{.SiteData.Hero.ButtonLink}}">
+            </label>
+            <label>Изображение (URL):
+                <input type="text" id="hero_image" value="{{.SiteData.Hero.Image}}">
+            </label>
+            <div id="hero-preview"></div>
+        </section>
+
+        <section class="admin-section">
+            <h2>Услуги</h2>
+            <div id="services-list"></div>
+            <button class="add-btn" id="add-service">+ Добавить услугу</button>
+        </section>
+
+        <section class="admin-section">
+            <h2>Проекты</h2>
+            <div id="projects-list"></div>
+            <button class="add-btn" id="add-project">+ Добавить проект</button>
+        </section>
+
+        <section class="admin-section">
+            <h2>Галерея</h2>
+            <div id="gallery-list"></div>
+            <h3>Загрузить изображение</h3>
+            <input type="file" id="upload-file" accept="image/*">
+            <button id="btn-upload">Загрузить в галерею</button>
+            <p id="upload-status" style="color:#0f0;margin-top:5px;"></p>
+        </section>
+
+        <section class="admin-section">
+            <h2>О нас</h2>
+            <label>Заголовок:
+                <input type="text" id="about_title" value="{{.SiteData.About.Title}}">
+            </label>
+            <label>Описание:
+                <textarea id="about_description">{{.SiteData.About.Description}}</textarea>
+            </label>
+            <label>Изображение (URL):
+                <input type="text" id="about_image" value="{{.SiteData.About.Image}}">
+            </label>
+        </section>
+
+        <section class="admin-section">
+            <h2>Контакты</h2>
+            <label>Email:
+                <input type="email" id="contact_email" value="{{.SiteData.Contact.Email}}">
+            </label>
+            <label>Телефон:
+                <input type="text" id="contact_phone" value="{{.SiteData.Contact.Phone}}">
+            </label>
+            <label>Адрес:
+                <input type="text" id="contact_address" value="{{.SiteData.Contact.Address}}">
+            </label>
+        </section>
+
+        <section class="admin-section">
+            <h2>Футер</h2>
+            <label>Копирайт:
+                <input type="text" id="footer_copyright" value="{{.SiteData.Footer.Copyright}}">
+            </label>
+        </section>
+
+        <section class="admin-section">
+            <h2>Сообщения с формы</h2>
+            <div id="messages-list"></div>
+        </section>
+    </main>
+
+    <script>
+        var siteData = {{.SiteData | toJson}};
+        var csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+
+        function renderLists(){
+            renderServices();
+            renderProjects();
+            renderGallery();
+            renderMessages();
+        }
+
+        function renderServices(){
+            var el=document.getElementById('services-list');
+            el.innerHTML='';
+            (siteData.services||[]).forEach(function(s,i){
+                var d=document.createElement('div');
+                d.className='list-item';
+                d.innerHTML='<div><strong>'+esc(s.title)+'</strong><br>'+esc(s.description)+(s.image?' <img src="'+esc(s.image)+'">':'')+'</div>'+
+                    '<div><button data-act="edit-svc" data-idx="'+i+'">Ред.</button><button data-act="del-svc" data-idx="'+i+'">Удал.</button></div>';
+                el.appendChild(d);
+            });
+        }
+
+        function renderProjects(){
+            var el=document.getElementById('projects-list');
+            el.innerHTML='';
+            (siteData.projects||[]).forEach(function(p,i){
+                var d=document.createElement('div');
+                d.className='list-item';
+                d.innerHTML='<div><strong>'+esc(p.title)+'</strong><br>'+esc(p.description)+(p.image?' <img src="'+esc(p.image)+'">':'')+'</div>'+
+                    '<div><button data-act="edit-prj" data-idx="'+i+'">Ред.</button><button data-act="del-prj" data-idx="'+i+'">Удал.</button></div>';
+                el.appendChild(d);
+            });
+        }
+
+        function renderGallery(){
+            var el=document.getElementById('gallery-list');
+            el.innerHTML='';
+            if(!siteData.gallery||siteData.gallery.length===0){
+                el.innerHTML='<p style="color:#888">Нет изображений в галерее</p>';
+                return;
+            }
+            siteData.gallery.forEach(function(g,i){
+                var d=document.createElement('div');
+                d.className='list-item';
+                d.innerHTML='<div><img src="'+esc(g.image)+'"> <span>'+esc(g.title||'')+'</span></div>'+
+                    '<div><button data-act="del-gal" data-idx="'+i+'">Удал.</button></div>';
+                el.appendChild(d);
+            });
+        }
+
+        function renderMessages(){
+            var el=document.getElementById('messages-list');
+            el.innerHTML='';
+            if(!siteData.messages||siteData.messages.length===0){
+                el.innerHTML='<p style="color:#888">Нет сообщений</p>';
+                return;
+            }
+            siteData.messages.forEach(function(m,i){
+                var d=document.createElement('div');
+                d.className='msg-item';
+                d.innerHTML='<strong>'+esc(m.name)+'</strong> ('+esc(m.email)+') <small>'+esc(m.date||'')+'</small><br>'+esc(m.message);
+                el.appendChild(d);
+            });
+        }
+
+        function esc(s){return s?String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):'';}
+
+        document.addEventListener('click',function(e){
+            var btn=e.target;
+            var act=btn.getAttribute('data-act');
+            if(!act)return;
+            var idx=parseInt(btn.getAttribute('data-idx'));
+            if(act==='del-svc'){siteData.services.splice(idx,1);renderServices();}
+            else if(act==='del-prj'){siteData.projects.splice(idx,1);renderProjects();}
+            else if(act==='del-gal'){siteData.gallery.splice(idx,1);renderGallery();}
+            else if(act==='edit-svc'){
+                var s=siteData.services[idx];
+                var t=prompt('Заголовок:',s.title);if(t===null)return;
+                var d=prompt('Описание:',s.description);if(d===null)return;
+                var img=prompt('URL изображения (пусто = без):',s.image);if(img===null)return;
+                siteData.services[idx]={id:s.id,title:t,description:d,icon:s.icon||'',image:img||''};
+                renderServices();
+            }
+            else if(act==='edit-prj'){
+                var p=siteData.projects[idx];
+                var t=prompt('Заголовок:',p.title);if(t===null)return;
+                var d=prompt('Описание:',p.description);if(d===null)return;
+                var img=prompt('URL изображения:',p.image);if(img===null)return;
+                siteData.projects[idx]={id:p.id,title:t,description:d,image:img||'',link:p.link||'#'};
+                renderProjects();
+            }
+        });
+
+        document.getElementById('add-service').addEventListener('click',function(){
+            var t=prompt('Заголовок услуги:');if(!t)return;
+            var d=prompt('Описание:');if(!d)return;
+            siteData.services=siteData.services||[];
+            siteData.services.push({id:Math.random().toString(36).substr(2,8),title:t,description:d,icon:'',image:''});
+            renderServices();
+        });
+
+        document.getElementById('add-project').addEventListener('click',function(){
+            var t=prompt('Заголовок проекта:');if(!t)return;
+            var d=prompt('Описание:');if(!d)return;
+            siteData.projects=siteData.projects||[];
+            siteData.projects.push({id:Math.random().toString(36).substr(2,8),title:t,description:d,image:'',link:'#'});
+            renderProjects();
+        });
+
+        document.getElementById('btn-save').addEventListener('click',function(){
+            var data={
+                site_title:document.getElementById('site_title').value,
+                site_tagline:document.getElementById('site_tagline').value,
+                hero:{
+                    title:document.getElementById('hero_title').value,
+                    subtitle:document.getElementById('hero_subtitle').value,
+                    button_text:document.getElementById('hero_btn_text').value,
+                    button_link:document.getElementById('hero_btn_link').value,
+                    image:document.getElementById('hero_image').value
+                },
+                services:siteData.services||[],
+                projects:siteData.projects||[],
+                gallery:siteData.gallery||[],
+                about:{
+                    title:document.getElementById('about_title').value,
+                    description:document.getElementById('about_description').value,
+                    image:document.getElementById('about_image').value
+                },
+                contact:{
+                    title:siteData.contact?siteData.contact.title:'',
+                    description:siteData.contact?siteData.contact.description:'',
+                    email:document.getElementById('contact_email').value,
+                    phone:document.getElementById('contact_phone').value,
+                    address:document.getElementById('contact_address').value
+                },
+                footer:{
+                    copyright:document.getElementById('footer_copyright').value,
+                    links:siteData.footer?siteData.footer.links:''
+                },
+                messages:siteData.messages||[],
+                nav_links:siteData.nav_links||[]
+            };
+            fetch('/admin/save',{method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken},body:JSON.stringify(data)})
+            .then(function(r){return r.json();})
+            .then(function(r){
+                document.getElementById('save-status').textContent=r.ok?'Сохранено!':r.error;
+                setTimeout(function(){document.getElementById('save-status').textContent='';},3000);
+            })
+            .catch(function(e){document.getElementById('save-status').textContent='Ошибка: '+e;});
+        });
+
+        document.getElementById('btn-upload').addEventListener('click',function(){
+            var fileInput=document.getElementById('upload-file');
+            if(!fileInput.files||!fileInput.files[0]){
+                document.getElementById('upload-status').textContent='Выберите файл!';
+                return;
+            }
+            var fd=new FormData();
+            fd.append('image',fileInput.files[0]);
+            fd.append('csrf',csrfToken);
+            fetch('/admin/upload',{method:'POST',body:fd})
+            .then(function(r){return r.json();})
+            .then(function(r){
+                if(r.url){
+                    siteData.gallery=siteData.gallery||[];
+                    siteData.gallery.push({id:Math.random().toString(36).substr(2,8),image:r.url,title:''});
+                    renderGallery();
+                    document.getElementById('upload-status').textContent='Загружено: '+r.url;
+                    fileInput.value='';
+                } else {
+                    document.getElementById('upload-status').textContent='Ошибка: '+(r.error||'unknown');
+                }
+            })
+            .catch(function(e){document.getElementById('upload-status').textContent='Ошибка загрузки: '+e;});
+        });
+
+        renderLists();
+    </script>
+</body>
+</html>
+{{end}}

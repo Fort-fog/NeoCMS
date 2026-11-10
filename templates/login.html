@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Вход в админ-панель — NEON NEXUS</title>
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+<div class="cyber-grid"></div>
+<div class="particles"></div>
+<main class="login-container">
+<h1 class="login-title">NEON NEXUS ADMIN</h1>
+{{if .Error}}<p class="login-error">{{.Error}}</p>{{end}}
+<form method="POST" action="/admin/login" class="login-form">
+<label for="password">Пароль:</label>
+<input type="password" id="password" name="password" required>
+<button type="submit">Войти</button>
+</form>
+</main>
+</body>
+</html>

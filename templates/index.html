@@ -1,0 +1,112 @@
+{{define "index.html"}}<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.SiteTitle}}</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap">
+</head>
+<body>
+    <div class="cyber-grid"></div>
+    <div class="particles"></div>
+    <nav class="nav">
+        <div class="nav-logo">{{.SiteTitle}}</div>
+        <div class="nav-links">
+            <a href="/">Главная</a>
+            <a href="/services">Услуги</a>
+            <a href="/gallery">Галерея</a>
+            <a href="/about">О нас</a>
+            <a href="/contact">Контакты</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+        {{if .Hero.Image}}<img src="{{.Hero.Image}}" alt="Hero" class="hero-bg">{{end}}
+        <h1 class="neon-title">{{.Hero.Title}}</h1>
+        <p class="hero-sub">{{.Hero.Subtitle}}</p>
+        <a href="{{.Hero.ButtonLink}}" class="btn-neon">{{.Hero.ButtonText}}</a>
+    </section>
+
+    <section class="features">
+        <h2 class="section-title neon-cyan">Наши услуги</h2>
+        <div class="cards-grid">
+            {{range .Services}}
+            <div class="card">
+                {{if .Image}}<img src="{{.Image}}" alt="{{.Title}}" class="card-img">{{end}}
+                <h3 class="neon-pink">{{.Title}}</h3>
+                <p>{{.Description}}</p>
+            </div>
+            {{end}}
+        </div>
+    </section>
+
+    <section class="projects">
+        <h2 class="section-title neon-purple">Проекты</h2>
+        <div class="cards-grid">
+            {{range .Projects}}
+            <div class="card">
+                {{if .Image}}<img src="{{.Image}}" alt="{{.Title}}" class="card-img">{{end}}
+                <h3 class="neon-blue">{{.Title}}</h3>
+                <p>{{.Description}}</p>
+                {{if .Link}}<a href="{{.Link}}" class="btn-neon btn-sm">Подробнее</a>{{end}}
+            </div>
+            {{end}}
+        </div>
+    </section>
+
+    <section class="cta">
+        <h2>{{.SiteTagline}}</h2>
+        <p>{{.About.Description}}</p>
+        <a href="/contact" class="btn-neon btn-pink">Связаться с нами</a>
+    </section>
+
+    <section class="contact" id="contact">
+        <h2 class="section-title neon-blue">{{.Contact.Title}}</h2>
+        <p>{{.Contact.Description}}</p>
+        <form id="contact-form" class="contact-form">
+            <input type="text" name="name" placeholder="Ваше имя" required>
+            <input type="email" name="email" placeholder="Email" required>
+            <textarea name="message" placeholder="Сообщение" required></textarea>
+            <button type="submit" class="btn-neon">Отправить</button>
+            <p id="contact-msg" class="form-status"></p>
+        </form>
+        <script>
+        document.querySelector('.contact-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            var form = this;
+            var btn = form.querySelector('button[type=submit]');
+            var msgEl = document.getElementById('contact-msg');
+            var name = form.querySelector('[name=name]').value;
+            var email = form.querySelector('[name=email]').value;
+            var message = form.querySelector('[name=message]').value;
+            btn.disabled = true;
+            fetch('/api/contact', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({name: name, email: email, message: message})
+            }).then(function(r){return r.json();}).then(function(d){
+                if(d.ok){
+                    msgEl.textContent = '✓ Сообщение отправлено!';
+                    msgEl.className = 'form-status ok';
+                    form.reset();
+                } else {
+                    msgEl.textContent = '✗ ' + (d.error || 'Ошибка отправки');
+                    msgEl.className = 'form-status error';
+                }
+            }).catch(function(){
+                msgEl.textContent = '✗ Сетевая ошибка. Попробуйте снова.';
+                msgEl.className = 'form-status error';
+            }).finally(function(){btn.disabled = false;});
+        });
+        </script>
+    </section>
+
+    <footer class="footer">
+        <p>{{.Footer.Copyright}}</p>
+    </footer>
+    <script src="/static/js/main.js"></script>
+</body>
+</html>
+{{end}}
